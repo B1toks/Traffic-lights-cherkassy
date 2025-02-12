@@ -49,7 +49,7 @@ const TrafficLightModal = ({ isOpen, closeModal, trafficLight, approveLight }) =
       {/* Вулиця */}
       <p><strong>Вулиця:</strong> Шевченка 6</p>
 
-      {/* Час останнього оновлення */}
+      {/* Час останнього оновлення  */}
       <p><strong>Оновлено:</strong> {trafficLight?.lastUpdated || "Невідомо(Ласт тайм)"}</p>
 
       {/* Фото світлофора */}
