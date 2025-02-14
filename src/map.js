@@ -9,8 +9,10 @@ const Map = () => {
   const [modalIsOpen, setModalIsOpen] = useState(false);
   const [selectedLight, setSelectedLight] = useState(null);
 
-  useEffect(() => {
-    fetch("https://api.openstreetmap.org/api/0.6/way/102712238")
+   // Поки що відображаємо фіксовані світлофори (можна буде замінити на реальні дані)
+
+   useEffect(() => {
+    fetch('http://92.43.82.153:5000/api/traffic-lights')  // Замінити localhost на твою публічну IP, якщо сайт має бути доступний з Інтернету
       .then((response) => response.json())
       .then((data) => {
         setTrafficLights([
@@ -18,7 +20,7 @@ const Map = () => {
           { id: 2, lat: 49.4454, lng: 32.0600, status: false, votes: 3 },
         ]);
       });
-  }, []);
+  }, []);  // Порожній масив вказує, що цей код виконується один раз після завантаження компонента
 
   const openModal = (light) => {
     setSelectedLight(light);
@@ -31,15 +33,28 @@ const Map = () => {
   };
 
   const approveLight = () => {
-    // Тут можна обробити апрув і оновити статус світлофора
-    setSelectedLight((prev) => ({ ...prev, status: !prev.status }));
-    closeModal();
+    // Відправка запиту на сервер для оновлення статусу світлофора
+    fetch(`http://localhost:5000/traffic-light/${selectedLight.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        status: !selectedLight.status,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        setSelectedLight((prev) => ({ ...prev, status: data.status }));
+        closeModal();
+      })
+      .catch((error) => console.error('Error updating traffic light:', error));
   };
 
   return (
     <div>
       <MapContainer
-        center={[49.4444, 32.0590]} 
+        center={[49.4444, 32.0590]}
         zoom={13}
         style={{ height: "100vh" }}
       >
@@ -47,7 +62,7 @@ const Map = () => {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         />
-        {trafficLights.map(({ id, lat, lng, status, votes }) => (
+        {trafficLights.map(({ id, lat, lng, status }) => (
           <Marker
             key={id}
             position={[lat, lng]}
@@ -56,7 +71,7 @@ const Map = () => {
               iconSize: [25, 25],
             })}
             eventHandlers={{
-              click: () => openModal({ id, lat, lng, status, votes }),
+              click: () => openModal({ id, lat, lng, status }),
             }}
           >
             <Popup>
@@ -64,29 +79,6 @@ const Map = () => {
             </Popup>
           </Marker>
         ))}
-
-        {/* Тестовий маркер */}
-        <Marker
-          position={[49.4444, 32.0590]} 
-          icon={L.icon({
-            iconUrl: "/green-light.png",
-            iconSize: [25, 25],
-          })}
-          eventHandlers={{
-            click: () =>
-              openModal({
-                id: 999,
-                lat: 49.4444,
-                lng: 32.0590,
-                status: true,
-                votes: 1,
-              }),
-          }}
-        >
-          <Popup>
-            Світлофор 999 - Статус: Включено
-          </Popup>
-        </Marker>
       </MapContainer>
 
       {/* Модальне вікно */}
