@@ -4,6 +4,8 @@ const User = require('../models/user');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
+router.use(express.json());
+
 router.post("/register", async (req, res) => {
 	try {
 		const {username, password} = req.body;
@@ -19,6 +21,7 @@ router.post("/register", async (req, res) => {
 router.post('/login', async (req, res) => {
 	try {
 		const {username, password} = req.body;
+		console.log(username, password);
 		const user = await User.findOne({username});
 		if (!user) {
 			return res.status(401).json({error: 'Authentication failed'});
