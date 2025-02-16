@@ -3,7 +3,7 @@ const mongoose = require('mongoose')
 const {Schema} = mongoose
 
 const trafficLightSchema = new Schema({
-	id: Number,
+	id: {type: Number, unique: true, index: true},
 	lat: Number,
 	lon: Number,
 	status: Boolean,
